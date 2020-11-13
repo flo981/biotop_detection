@@ -57,6 +57,7 @@ def biotop_current_map(temp_location, text):
     temp_biotop_convex_hull = temp_biotop.convex_hull
     temp_biotop_envelope = temp_biotop.envelope
 
+    ## WRITE BIOTOP DESCIBTION IN IMAGE
     folium.GeoJson(temp_biotop, style_function=style_fcn).add_to(m_temp)
     # folium.GeoJson(temp_biotop_scaled,style_function=style_fcn).add_to(m_temp)
     #folium.GeoJson(temp_biotop_convex_hull, style_function=style_fcn_hull).add_to(m_temp)
