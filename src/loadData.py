@@ -19,12 +19,17 @@ def getText(temp_biotop):
     return text
 
 def style_fcn(x):
-    return {'stroke':True,
-            'color': '#ff0000',
-            'fillColor': '#AARRGGBB',
-            'opacity':1, 'weight':2,
-            'line_cap':'round',
-            'fill':False}
+    return {'stroke':True,'color': '#FF0000', 'fillColor': '#AARRGGBB','opacity':1, 'weight':2, 'line_cap':'round', 'fill':False}
+
+
+def style_fcn_hull(x):
+    return {'stroke':True,'color': '#008FFF', 'fillColor': '#AARRGGBB','opacity':1, 'weight':2, 'line_cap':'round', 'fill':False}
+
+
+def style_fcn_env(x):
+    return {'stroke':True,'color': '#F700FF', 'fillColor': '#AARRGGBB','opacity':1, 'weight':2, 'line_cap':'round', 'fill':False}
+
+
 
 def biotop_center(temp_biotop):
     #get biotop pos
@@ -48,14 +53,20 @@ def biotop_current_map(temp_location, text):
                                               transparent=True,
                                               overlay=True).add_to(m_temp)
 
-    bio = folium.GeoJson(temp_biotop, style_function=style_fcn)
-    bio.add_to(m_temp)
-    folium.map.Marker([temp_location[1] + 0.001, temp_location[0] - 0.001],
-                    icon=DivIcon(
-                        icon_size=(150, 36),
-                        icon_anchor=(0, 0),
-                        html='<div style="font-size: 10pt;"><span style="color: #ff0000;">%s</span></div>' % text)).add_to(m_temp)
-    #TODO: Add more text information: Gemeinde...
+    # temp_biotop_scaled = temp_biotop.scale(xfact=2, yfact=2, zfact=0, origin='center')
+    temp_biotop_convex_hull = temp_biotop.convex_hull
+    temp_biotop_envelope = temp_biotop.envelope
+
+    folium.GeoJson(temp_biotop, style_function=style_fcn).add_to(m_temp)
+    # folium.GeoJson(temp_biotop_scaled,style_function=style_fcn).add_to(m_temp)
+    #folium.GeoJson(temp_biotop_convex_hull, style_function=style_fcn_hull).add_to(m_temp)
+    #folium.GeoJson(temp_biotop_envelope, style_function=style_fcn_env).add_to(m_temp)
+
+    #folium.map.Marker([temp_location[1] + 0.001, temp_location[0] - 0.001],
+    #                icon=DivIcon(
+    #                    icon_size=(150, 36),
+    #                    icon_anchor=(0, 0),
+    #                    html='<div style="font-size: 10pt;"><span style="color: #ff0000;">%s</span></div>' % text)).add_to(m_temp)
     return m_temp
 
 def save_current_biotop(m_temp, bio_number):
