@@ -10,6 +10,7 @@ import cv2
 #Oder rote linien dünner?
 #bessere qualität!
 #wenn hecke komplexer => problem da nur die hülle ausgeschnitten wird!
+#schwarze linien => folyfit confex hull check (wahrscheinlicher grund: lücken in roter linie)
 
 
 def somestuff(k):

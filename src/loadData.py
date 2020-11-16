@@ -6,7 +6,7 @@ from selenium import webdriver
 import os
 import io
 from PIL import Image
-from folium.features import DivIcon
+#from folium.features import DivIcon
 
 
 def getText(temp_biotop):
@@ -38,9 +38,10 @@ def biotop_center(temp_biotop):
     return transformer.transform(center_temp[key].x,center_temp[key].y)
 
 def biotop_current_map(temp_location, text):
-    #TODO: Linie weiter ausen umrunden lassen oder zusätzliche box
+    #TODO:  Linie weiter ausen umrunden lassen oder zusätzliche box
+    #       Max Zoom tetsen (changed 18->20)
     m_temp = Map(tiles=None, location=[temp_location[1], temp_location[0]],
-                 zoom_start=18,
+                 zoom_start=20,
                  prefer_canvas=True,
                  no_touch=True,
                  disable_3d=True,
