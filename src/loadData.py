@@ -54,15 +54,15 @@ def biotop_current_map(temp_location, text):
                                               transparent=True,
                                               overlay=True).add_to(m_temp)
 
-    # temp_biotop_scaled = temp_biotop.scale(xfact=2, yfact=2, zfact=0, origin='center')
+    #temp_biotop_scaled = temp_biotop.scale(xfact=2, yfact=2, zfact=0, origin='center')
     temp_biotop_convex_hull = temp_biotop.convex_hull
     temp_biotop_envelope = temp_biotop.envelope
 
     ## WRITE BIOTOP DESCIBTION IN IMAGE
     folium.GeoJson(temp_biotop, style_function=style_fcn).add_to(m_temp)
     # folium.GeoJson(temp_biotop_scaled,style_function=style_fcn).add_to(m_temp)
-    #folium.GeoJson(temp_biotop_convex_hull, style_function=style_fcn_hull).add_to(m_temp)
-    #folium.GeoJson(temp_biotop_envelope, style_function=style_fcn_env).add_to(m_temp)
+    # folium.GeoJson(temp_biotop_convex_hull, style_function=style_fcn_hull).add_to(m_temp)
+    # folium.GeoJson(temp_biotop_envelope, style_function=style_fcn_env).add_to(m_temp)
 
     #folium.map.Marker([temp_location[1] + 0.001, temp_location[0] - 0.001],
     #                icon=DivIcon(
@@ -84,13 +84,17 @@ def save_current_biotop2(m_temp, bio_number,case):
 
 if __name__ == "__main__":
     script_dir = os.path.dirname(__file__)
+    print('Load: Biotopkartierung')
     nReserve = gpd.read_file(os.path.join(script_dir, '../data/Biotopkartierung/Biotopkartierung.shp'))
 
     biotop_1 = nReserve.query("biotoptyp=='8.1.1.1'")
     biotop_2 = nReserve.query("biotoptyp=='8.1.1.2'")
 
+    print('Load: bmaporthofoto30cm')
     wmts = "http://maps.wien.gv.at/basemap/bmaporthofoto30cm/normal/google3857/{z}/{y}/{x}.jpeg"
     #driver = webdriver.Firefox(executable_path='/usr/local/bin/geckodriver')
+
+    print('Start: webdriver (Chrome)')
     driver = webdriver.Chrome(executable_path='/usr/local/bin/chromedriver')
 
     transformer = Transformer.from_crs(31258, 4326, always_xy=True)  # 1frpm 2to
