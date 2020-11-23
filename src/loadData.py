@@ -59,7 +59,7 @@ def biotop_current_map(temp_location, text):
     temp_biotop_envelope = temp_biotop.envelope
 
     ## WRITE BIOTOP DESCIBTION IN IMAGE
-    folium.GeoJson(temp_biotop, style_function=style_fcn).add_to(m_temp)
+    #folium.GeoJson(temp_biotop, style_function=style_fcn).add_to(m_temp)
     # folium.GeoJson(temp_biotop_scaled,style_function=style_fcn).add_to(m_temp)
     # folium.GeoJson(temp_biotop_convex_hull, style_function=style_fcn_hull).add_to(m_temp)
     # folium.GeoJson(temp_biotop_envelope, style_function=style_fcn_env).add_to(m_temp)
@@ -102,6 +102,8 @@ if __name__ == "__main__":
 
     len_bio_1 = biotop_1.shape[0]
     len_bio_2 = biotop_2.shape[0]
+    len_totoal =  len_bio_1 + len_bio_2
+
 
     biotop_key_nummer = biotop_1['Nummer']
     biotop_keys = biotop_key_nummer.keys()
@@ -111,20 +113,20 @@ if __name__ == "__main__":
         str_nummer = "\'" + bio_i + "\'"
         query_str = "Nummer==" + str(str_nummer)
         temp_biotop = biotop_1.query(query_str)
-        print("Process Biotop (1): ", i, " ", key_i)
+        print("Process Biotop (1): ", i, "/",len_totoal, " ", key_i)
         temp_location = biotop_center(temp_biotop)
         m_temp = biotop_current_map(temp_location,getText(temp_biotop))
         save_current_biotop2(m_temp, bio_i, 1)
 
     biotop_key_nummer = biotop_2['Nummer']
     biotop_keys = biotop_key_nummer.keys()
-    for i in range(0, len_bio_2-1):
-        key_i = biotop_keys[i]
+    for j in range(0, len_bio_2-1):
+        key_i = biotop_keys[j]
         bio_i = biotop_2['Nummer'][key_i]
         str_nummer = "\'" + bio_i + "\'"
         query_str = "Nummer==" + str(str_nummer)
         temp_biotop = biotop_2.query(query_str)
-        print("Process Biotop (2): ", i, " ", key_i)
+        print("Process Biotop (2): ", j+i, "/", len_totoal, " ", key_i)
         temp_location = biotop_center(temp_biotop)
         m_temp = biotop_current_map(temp_location,str(bio_i))
         save_current_biotop2(m_temp, bio_i, 2)
