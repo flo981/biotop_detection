@@ -1,7 +1,7 @@
 # geo_hedge
 geo_hedge
 
-#dependencies:
+# dependencies:
 import geopandas as gpd
 import folium
 from folium.folium import Map
@@ -14,7 +14,7 @@ import numpy as np
 from PIL import Image, ImageFilter
 import cv2
 
-#driver chrome (firefox also possible):
+# driver chrome (firefox also possible):
 
 https://chromedriver.chromium.org/downloads
 copy to usr/local/bin/
