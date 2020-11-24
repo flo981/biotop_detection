@@ -6,7 +6,7 @@ from selenium import webdriver
 import os
 import io
 from PIL import Image
-#from folium.features import DivIcon
+from folium.features import DivIcon
 
 
 def getText(temp_biotop):
@@ -37,9 +37,12 @@ def biotop_center(temp_biotop):
     key = center_temp.keys()[0]
     return transformer.transform(center_temp[key].x,center_temp[key].y)
 
-def biotop_current_map(temp_location, text):
+def biotop_current_map(temp_location, text, BIOTOP_BORDER, BIOTOP_DESCRIPTION, case):
     #TODO:  Linie weiter ausen umrunden lassen oder zusätzliche box
     #       Max Zoom tetsen (changed 18->20)
+
+    BIOTOP_SCALE = BIOTOP_CONVEX = BIOTOP_ENV = 0
+
     m_temp = Map(tiles=None, location=[temp_location[1], temp_location[0]],
                  zoom_start=20,
                  prefer_canvas=True,
@@ -54,22 +57,29 @@ def biotop_current_map(temp_location, text):
                                               transparent=True,
                                               overlay=True).add_to(m_temp)
 
-    #temp_biotop_scaled = temp_biotop.scale(xfact=2, yfact=2, zfact=0, origin='center')
-    temp_biotop_convex_hull = temp_biotop.convex_hull
-    temp_biotop_envelope = temp_biotop.envelope
-
-    ## WRITE BIOTOP DESCIBTION IN IMAGE
-    #folium.GeoJson(temp_biotop, style_function=style_fcn).add_to(m_temp)
+    if BIOTOP_BORDER:
+        case = 'B_1'
+        folium.GeoJson(temp_biotop, style_function=style_fcn).add_to(m_temp)
     # folium.GeoJson(temp_biotop_scaled,style_function=style_fcn).add_to(m_temp)
     # folium.GeoJson(temp_biotop_convex_hull, style_function=style_fcn_hull).add_to(m_temp)
     # folium.GeoJson(temp_biotop_envelope, style_function=style_fcn_env).add_to(m_temp)
 
-    #folium.map.Marker([temp_location[1] + 0.001, temp_location[0] - 0.001],
-    #                icon=DivIcon(
-    #                    icon_size=(150, 36),
-    #                    icon_anchor=(0, 0),
-    #                    html='<div style="font-size: 10pt;"><span style="color: #ff0000;">%s</span></div>' % text)).add_to(m_temp)
-    return m_temp
+    ## WRITE BIOTOP DESCIBTION IN IMAGE
+    if BIOTOP_DESCRIPTION:
+        folium.map.Marker([temp_location[1] + 0.001, temp_location[0] - 0.001],
+                    icon=DivIcon(
+                        icon_size=(150, 36),
+                        icon_anchor=(0, 0),
+                        html='<div style="font-size: 10pt;"><span style="color: #ff0000;">%s</span></div>' % text)).add_to(m_temp)
+    if BIOTOP_SCALE:
+        temp_biotop_scaled = temp_biotop.scale(xfact=2, yfact=2, zfact=0, origin='center')
+    if BIOTOP_CONVEX:
+        temp_biotop_convex_hull = temp_biotop.convex_hull
+    if BIOTOP_ENV:
+        temp_biotop_envelope = temp_biotop.envelope
+
+    save_current_biotop2(m_temp, bio_i, case)
+    #return m_temp
 
 def save_current_biotop(m_temp, bio_number):
     png = m_temp._to_png()
@@ -77,10 +87,18 @@ def save_current_biotop(m_temp, bio_number):
     bytes_written = out.write(png)
     out.close()
 
+def create_bio_path(bio_i):
+    temp_path = '../data/output_biotop_dir/' + 'bio_' + bio_i + '/'
+    if not os.path.exists(temp_path):
+        os.makedirs(temp_path)
+        return True
+    return False
+
 def save_current_biotop2(m_temp, bio_number,case):
     img_data = m_temp._to_png()
     img = Image.open(io.BytesIO(img_data))
-    img.save(os.path.join(script_dir, '../data/output_biotop/'+str(case)+'_'+bio_number+'.png'))
+    temp_path = '../data/output_biotop_dir/' + 'bio_' + bio_number + '/'
+    img.save(os.path.join(script_dir, temp_path + str(case) + '_' + bio_number + '.png'))
 
 if __name__ == "__main__":
     script_dir = os.path.dirname(__file__)
@@ -99,11 +117,9 @@ if __name__ == "__main__":
 
     transformer = Transformer.from_crs(31258, 4326, always_xy=True)  # 1frpm 2to
 
-
     len_bio_1 = biotop_1.shape[0]
     len_bio_2 = biotop_2.shape[0]
     len_totoal =  len_bio_1 + len_bio_2
-
 
     biotop_key_nummer = biotop_1['Nummer']
     biotop_keys = biotop_key_nummer.keys()
@@ -113,10 +129,20 @@ if __name__ == "__main__":
         str_nummer = "\'" + bio_i + "\'"
         query_str = "Nummer==" + str(str_nummer)
         temp_biotop = biotop_1.query(query_str)
-        print("Process Biotop (1): ", i, "/",len_totoal, " ", key_i)
         temp_location = biotop_center(temp_biotop)
-        m_temp = biotop_current_map(temp_location,getText(temp_biotop))
-        save_current_biotop2(m_temp, bio_i, 1)
+
+        PATH_NEW = create_bio_path(bio_i)
+        if PATH_NEW:
+            print("Process Biotop (1): ", i, "/", len_totoal, " ", bio_i)
+            #m_temp = biotop_current_map(temp_location,text=getText(temp_biotop),BIOTOP_BORDER=False, BIOTOP_DESCRIPTION=False, case=1)
+            biotop_current_map(temp_location, text=getText(temp_biotop), BIOTOP_BORDER=False, BIOTOP_DESCRIPTION=False,
+                           case=1)
+            biotop_current_map(temp_location, text=getText(temp_biotop), BIOTOP_BORDER=True, BIOTOP_DESCRIPTION=False,
+                           case=1)
+        #save_current_biotop2(m_temp, bio_i, 1)
+        else:
+            print("Already Existing Biotop (1): ", i, "/", len_totoal, " ", bio_i)
+
 
     biotop_key_nummer = biotop_2['Nummer']
     biotop_keys = biotop_key_nummer.keys()
@@ -126,10 +152,20 @@ if __name__ == "__main__":
         str_nummer = "\'" + bio_i + "\'"
         query_str = "Nummer==" + str(str_nummer)
         temp_biotop = biotop_2.query(query_str)
-        print("Process Biotop (2): ", j+i, "/", len_totoal, " ", key_i)
-        temp_location = biotop_center(temp_biotop)
-        m_temp = biotop_current_map(temp_location,str(bio_i))
-        save_current_biotop2(m_temp, bio_i, 2)
 
+        temp_location = biotop_center(temp_biotop)
+
+        PATH_NEW = create_bio_path(bio_i)
+        if PATH_NEW:
+            print("Process Biotop (2): ", j + i, "/", len_totoal, " ", bio_i)
+            biotop_current_map(temp_location, text=getText(temp_biotop), BIOTOP_BORDER=False, BIOTOP_DESCRIPTION=False,
+                           case=2)
+            biotop_current_map(temp_location, text=getText(temp_biotop), BIOTOP_BORDER=True, BIOTOP_DESCRIPTION=False,
+                           case=2)
+
+        #m_temp = biotop_current_map(temp_location,text=getText(temp_biotop),BIOTOP_BORDER=False, BIOTOP_DESCRIPTION=False)
+        #save_current_biotop2(m_temp, bio_i, 2)
+        else:
+            print("Already Existing Biotop (2): ", i, "/", len_totoal, " ", bio_i)
 
 #TODO: down-size images
