@@ -21,6 +21,8 @@ def getText(temp_biotop):
 def style_fcn(x):
     return {'stroke':True,'color': '#FF0000', 'fillColor': '#AARRGGBB','opacity':1, 'weight':2, 'line_cap':'round', 'fill':False}
 
+def style_fnc_mask(x):
+    return {'stroke':True,'color': '#FFFFFF', 'fillColor': '#FFFFFF','opacity':1, 'weight':10, 'line_cap':'round', 'fill':True, 'fillOpacity': 1}
 
 def style_fcn_hull(x):
     return {'stroke':True,'color': '#008FFF', 'fillColor': '#AARRGGBB','opacity':1, 'weight':2, 'line_cap':'round', 'fill':False}
@@ -37,7 +39,7 @@ def biotop_center(temp_biotop):
     key = center_temp.keys()[0]
     return transformer.transform(center_temp[key].x,center_temp[key].y)
 
-def biotop_current_map(temp_location, text, BIOTOP_BORDER, BIOTOP_DESCRIPTION, case):
+def biotop_current_map(temp_location, text, BIOTOP_BORDER, BIOTOP_MASK ,BIOTOP_DESCRIPTION, case):
     #TODO:  Linie weiter ausen umrunden lassen oder zusätzliche box
     #       Max Zoom tetsen (changed 18->20)
 
@@ -58,11 +60,15 @@ def biotop_current_map(temp_location, text, BIOTOP_BORDER, BIOTOP_DESCRIPTION, c
                                               overlay=True).add_to(m_temp)
 
     if BIOTOP_BORDER:
-        case = 'B_1'
+        case = 'B_'+str(case)
         folium.GeoJson(temp_biotop, style_function=style_fcn).add_to(m_temp)
     # folium.GeoJson(temp_biotop_scaled,style_function=style_fcn).add_to(m_temp)
     # folium.GeoJson(temp_biotop_convex_hull, style_function=style_fcn_hull).add_to(m_temp)
     # folium.GeoJson(temp_biotop_envelope, style_function=style_fcn_env).add_to(m_temp)
+
+    if BIOTOP_MASK:
+        case = 'M_'+str(case)
+        folium.GeoJson(temp_biotop, style_function=style_fnc_mask).add_to(m_temp)
 
     ## WRITE BIOTOP DESCIBTION IN IMAGE
     if BIOTOP_DESCRIPTION:
@@ -98,7 +104,7 @@ def save_current_biotop2(m_temp, bio_number,case):
     img_data = m_temp._to_png()
     img = Image.open(io.BytesIO(img_data))
     temp_path = '../data/output_biotop_dir/' + 'bio_' + bio_number + '/'
-    img.save(os.path.join(script_dir, temp_path + str(case) + '_' + bio_number + '.png'))
+    img.save(os.path.join(script_dir, temp_path + case + '_' + bio_number + '.png'))
 
 if __name__ == "__main__":
     script_dir = os.path.dirname(__file__)
@@ -135,9 +141,11 @@ if __name__ == "__main__":
         if PATH_NEW:
             print("Process Biotop (1): ", i, "/", len_totoal, " ", bio_i)
             #m_temp = biotop_current_map(temp_location,text=getText(temp_biotop),BIOTOP_BORDER=False, BIOTOP_DESCRIPTION=False, case=1)
-            biotop_current_map(temp_location, text=getText(temp_biotop), BIOTOP_BORDER=False, BIOTOP_DESCRIPTION=False,
+            biotop_current_map(temp_location, text=getText(temp_biotop), BIOTOP_BORDER=False, BIOTOP_MASK = False, BIOTOP_DESCRIPTION=True,
+                           case='1')
+            biotop_current_map(temp_location, text=getText(temp_biotop), BIOTOP_BORDER=True, BIOTOP_MASK = False, BIOTOP_DESCRIPTION=False,
                            case=1)
-            biotop_current_map(temp_location, text=getText(temp_biotop), BIOTOP_BORDER=True, BIOTOP_DESCRIPTION=False,
+            biotop_current_map(temp_location, text=getText(temp_biotop), BIOTOP_BORDER=False, BIOTOP_MASK = True, BIOTOP_DESCRIPTION=False,
                            case=1)
         #save_current_biotop2(m_temp, bio_i, 1)
         else:
@@ -158,10 +166,12 @@ if __name__ == "__main__":
         PATH_NEW = create_bio_path(bio_i)
         if PATH_NEW:
             print("Process Biotop (2): ", j + i, "/", len_totoal, " ", bio_i)
-            biotop_current_map(temp_location, text=getText(temp_biotop), BIOTOP_BORDER=False, BIOTOP_DESCRIPTION=False,
+            biotop_current_map(temp_location, text=getText(temp_biotop), BIOTOP_BORDER=False, BIOTOP_MASK = False, BIOTOP_DESCRIPTION=True,
+                           case='2')
+            biotop_current_map(temp_location, text=getText(temp_biotop), BIOTOP_BORDER=True, BIOTOP_MASK = False, BIOTOP_DESCRIPTION=False,
                            case=2)
-            biotop_current_map(temp_location, text=getText(temp_biotop), BIOTOP_BORDER=True, BIOTOP_DESCRIPTION=False,
-                           case=2)
+            biotop_current_map(temp_location, text=getText(temp_biotop), BIOTOP_BORDER=False, BIOTOP_MASK = True, BIOTOP_DESCRIPTION=False,
+                               case=2)
 
         #m_temp = biotop_current_map(temp_location,text=getText(temp_biotop),BIOTOP_BORDER=False, BIOTOP_DESCRIPTION=False)
         #save_current_biotop2(m_temp, bio_i, 2)

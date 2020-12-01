@@ -11,13 +11,6 @@ import os.path
 import numpy as np
 from matplotlib.path import Path
 
-#TODO: Maske auf orginalBild ohne rote linien anwenden
-#Oder rote linien dünner?
-#bessere qualität!
-#wenn hecke komplexer => problem da nur die hülle ausgeschnitten wird!
-#schwarze linien => folyfit confex hull check (wahrscheinlicher grund: lücken in roter linie)
-#Größerer Rahmen ausscheniden: mit addieren! beachten ob links oder recht (oben/unten)
-# von centrum, dementsprechend +oder- addieren zum wert
 # ML-NN: Train on color and structure?
 
 def somestuff(k):
@@ -34,12 +27,19 @@ def cropImage(files, bio_folder):
     # #F700FF = [247, 0, 255]
     # #FF0000 = [255,0,0]
     x_border, y_border = np.where(np.all(im==[255, 0, 0],axis=2))
+    #plt.scatter(y_border, -x_border)
+    #plt.show()
+
+
     temp = np.array([y_border, x_border])
     temp = np.transpose(temp)
 
     #roi_corners = np.array([[(x_border[0],y_border[0]), (x_border[10],y_border[10]), (x_border[20],y_border[20]), (x_border[20],y_border[20])]], dtype=np.int32)
     roi_corners_new = np.array([[somestuff(k) for k in temp]], dtype=np.int32)
     roi_corners = roi_corners_new
+    #    #x = roi_corners[0][:, i]
+    #plt.scatter(roi_corners[0][:, 0],roi_corners[0][:, 1])
+    #plt.show()
 
     # load original image with cv2 (without red border line
     # -1 loads as-is so if it will be 3 or 4 channel as the original
@@ -60,8 +60,8 @@ def cropImage(files, bio_folder):
     # fillConvexPoly if you know it's convex
     # fillPoly
     #cv2.fillConvexPoly(mask, cv2.convexHull(roi_corners), ignore_mask_color)
-    cv2.fillConvexPoly(mask, cv2.convexHull(roi_corners), ignore_mask_color)
-    cv2.fillConvexPoly(mask_2, roi_corners, ignore_mask_color2)
+    cv2.fillConvexPoly(mask, cv2.convexHull(roi_corners), ignore_mask_color,lineType=cv2.LINE_AA)
+    cv2.fillPoly(mask_2, roi_corners, ignore_mask_color2,lineType=cv2.LINE_AA)
 
 
     # apply the mask
@@ -77,8 +77,6 @@ def cropImage(files, bio_folder):
     masked_cropped_image = masked_image[xmin:xmax, ymin:ymax]
     masked_cropped_image_2 = masked_image_2[xmin:xmax, ymin:ymax]
 
-
-
     filename = '../data/output_biotop_dir/'+bio_folder + '/' +'1cropped_' + rawfile
     filename2 = '../data/output_biotop_dir/'+bio_folder + '/' +'2cropped_' + rawfile
 
@@ -91,58 +89,39 @@ def cropImage(files, bio_folder):
     #except:
     #    print("error: ", rawfile)
 
-def crop_v2(files, bio_folder):
 
-    borderfile = [x for x in files if "B" in x][0]
-    rawfile = [x for x in files if "B" not in x][0]
+def crop_masked(files,bio_folder):
+    borderfile = [x for x in files if "M" in x][0]
+    rawfile = [x for x in files if "M" not in x][0]
+
     # Open image with red border line and make into Numpy array
-    im = Image.open('../data/output_biotop_dir/' + bio_folder + '/' + borderfile).convert('RGB')
-    im = np.array(im)
+    image_mask = cv2.imread('../data/output_biotop_dir/' + bio_folder + '/' + borderfile)
+    image_raw = cv2.imread('../data/output_biotop_dir/' + bio_folder + '/' + rawfile)
 
-    # Find X,Y coordinates of all red pixels
-    # #F700FF = [247, 0, 255]
-    # #FF0000 = [255,0,0]
-    x_border, y_border = np.where(np.all(im == [255, 0, 0], axis=2))
-    temp = np.array([y_border, x_border])
-    temp = np.transpose(temp)
+    #remove outliers
+    image_mask = cv2.medianBlur(image_mask, 3)
 
-    # roi_corners = np.array([[(x_border[0],y_border[0]), (x_border[10],y_border[10]), (x_border[20],y_border[20]), (x_border[20],y_border[20])]], dtype=np.int32)
-    roi_corners_new = np.array([[somestuff(k) for k in temp]], dtype=np.int32)
-    roi_corners = roi_corners_new
+    # Make all perfectly not black pixels white
+    image_mask[np.all(image_mask != (255, 255, 255), axis=-1)] = (0,0,0)
 
-    img = cv2.imread('../data/output_biotop_dir/' + bio_folder + '/' + rawfile, -1)
-    # vertices of the cropping polygon
+    #apply mask
+    masked_image = cv2.bitwise_and(image_raw, image_mask)
 
-    xycrop = np.vstack((x_border, y_border)).T
+    # get edges to crop irrelevant regions
+    border = np.where(np.all(image_mask == (255, 255, 255), axis=-1))
 
-    # xy coordinates for each pixel in the image
-    nr, nc, z = img.shape
-    ygrid, xgrid, zgrid= np.mgrid[:nr, :nc, :z]
-    xypix = np.vstack((xgrid.ravel(), ygrid.ravel(), zgrid.ravel())).T
+    xmin = min(border[0])
+    ymin = min(border[1])
+    xmax = max(border[0])
+    ymax = max(border[1])
 
-    # construct a Path from the vertices
-    pth = Path(xycrop, closed=False)
+    masked_cropped_image = masked_image[xmin:xmax, ymin:ymax]
 
-    # test which pixels fall within the path
-    #mask = pth.contains_points(xypix)
-
-    # reshape to the same size as the image
-    mask = mask.reshape(img.shape)
-
-    # create a masked array
-    masked = np.ma.masked_array(img, ~mask)
-
-    # if you want to get rid of the blank space above and below the cropped
-    # region, use the min and max x, y values of the cropping polygon:
-
-    xmin, xmax = int(x_border.min()), int(np.ceil(x_border.max()))
-    ymin, ymax = int(y_border.min()), int(np.ceil(y_border.max()))
-    trimmed = masked[ymin:ymax, xmin:xmax]
-
-    filename = '../data/output_biotop_dir/' + bio_folder + '/' + 'v2_cropped_' + rawfile
+    filename = '../data/output_biotop_dir/' + bio_folder + '/' + '1cropped_' + rawfile
     print(" ==== > Crop: ", rawfile)
     # save the result
-    cv2.imwrite(filename, trimmed)
+
+    cv2.imwrite(filename, masked_cropped_image)
 
 if __name__ == "__main__":
     PATH = '../data/output_biotop_dir/'
@@ -153,11 +132,12 @@ if __name__ == "__main__":
     for folder in folders:
         i=i+1
         files = os.listdir(PATH + folder)
-        files[:] = [x for x in files if ".DS_Store" not in x]
+        files[:] = [x for x in files if ".DS_Store" not in x and "cropped" not in x and "B" not in x]
         if (len(files) != 1 and len(files) != 0):
             print('crop: '+folder, i, "/", len(folders))
             #cropImage(files, folder)
-            crop_v2(files,folder)
-            break
+            crop_masked(files, folder)
+
+
 
 
