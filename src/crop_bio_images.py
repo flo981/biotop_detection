@@ -117,7 +117,7 @@ def crop_masked(files,bio_folder):
 
     masked_cropped_image = masked_image[xmin:xmax, ymin:ymax]
 
-    #convert image to RGBA
+    #convert image to RGBA and make black transparent
     src = masked_cropped_image
     tmp = cv2.cvtColor(src, cv2.COLOR_BGR2GRAY)
     _, alpha = cv2.threshold(tmp, 0, 255, cv2.THRESH_BINARY)
@@ -145,7 +145,3 @@ if __name__ == "__main__":
             print('crop: '+folder, i, "/", len(folders))
             #cropImage(files, folder)
             crop_masked(files, folder)
-
-
-
-
