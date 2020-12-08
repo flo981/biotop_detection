@@ -7,9 +7,10 @@ Automated Biotop processing using public availiable aerial image data (orthophot
 - Classsification of biotops with trained net using a sliding window
 
 # Modules:
-- Image generation:
+## Image generation:
 
-## dependencies:
+- Dependencies:
+```
 import geopandas as gpd
 import folium
 from folium.folium import Map
@@ -20,15 +21,16 @@ import io
 import numpy as np
 from PIL import Image, ImageFilter
 import cv2
-
-## driver chrome (firefox also possible):
+```
+- Driver chrome (firefox also possible):
 
 https://chromedriver.chromium.org/downloads
+```
 copy to usr/local/bin/
+```
 
 
-
-# net train
+## net train
 - Run training xxxnet
 ```
 make_image_classifier   --image_dir /Users/flo/Desktop/backup_output_biotop/training_patches/   --tfhub_module https://tfhub.dev/google/tf2-preview/mobilenet_v2/feature_vector/4   --image_size 224   --saved_model_dir my_dir/new_model   --labels_output_file class_labels.txt   --tflite_output_file new_mobile_model.tflite --train_epochs 20
