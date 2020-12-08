@@ -12,9 +12,13 @@ import imutils
 import argparse
 import time
 
+
 import numpy as np
 from PIL import Image
 import tensorflow as tf  # TF2
+
+
+
 
 
 def pyramid(image, scale=1.5, minSize=(20, 20)):
@@ -72,17 +76,8 @@ def iterate_patches(files, bio_folder, args, height, width):
             # if the window does not meet our desired window size, ignore it
             if window.shape[0] != winH or window.shape[1] != winW:
                 continue
-            # THIS IS WHERE YOU WOULD PROCESS YOUR WINDOW, SUCH AS APPLYING A
-            # MACHINE LEARNING CLASSIFIER TO CLASSIFY THE CONTENTS OF THE
-            # WINDOW
-            # since we do not have a classifier, we'll just draw the window
+
             clone = resized.copy()
-
-            #cv2.rectangle(clone, (x, y), (x + winW, y + winH), (0, 255, 0), 2)
-            #cv2.imshow("window", clone)
-
-            # if key == ord('1'):
-            #    continue
 
             # Disregard windows outside of biotop/border cases
             threshold_black = 100
@@ -94,6 +89,7 @@ def iterate_patches(files, bio_folder, args, height, width):
                 img = Image.fromarray(window).convert('RGB')
                 img = img.resize([width, height])
 
+                #START CLASSIFICATION PROCESS
                 # add N dim
                 input_data = np.expand_dims(img, axis=0)
                 if floating_model:
@@ -122,13 +118,17 @@ def iterate_patches(files, bio_folder, args, height, width):
                 #         print('{:08.6f}: {}'.format(float(results[i]), labels[i]))
                 #     else:
                 #         print('{:08.6f}: {}'.format(float(results[i] / 255.0), labels[i]))
+
         percent = (c_bio*100)/(c_bio+c_nbio)
-        #print(c_bio, "/", c_bio+c_nbio, " bio%: ", percent)
-        print('{:02.2f} % Biotop // Image Patches: {}'.format(float(percent), c_bio+c_nbio))
+        content  = "{} {:02.2f} {}".format(bio_folder[4:], percent, c_bio+c_nbio)
+        print(content)
+
+        #show results in patch
         cv2.imshow("window", mod_im)
         key = cv2.waitKey(0)
-        print("------")
 
+        content  = "{} {:02.2f} {}".format(bio_folder[4:], percent, c_bio+c_nbio)
+        return content
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -175,6 +175,11 @@ if __name__ == "__main__":
     PATH = '../../data/output_biotop_dir/'
     folders = os.listdir(PATH)
     i = 0
+
+    #write results to file
+    output_file = open('output.txt', 'w')
+    output_file.write("BiotopNR Percentage nPatches\n")
+
     # Remove ".DS_Store"
     folders[:] = [x for x in folders if ".DS_Store" not in x]
     for folder in folders:
@@ -182,9 +187,17 @@ if __name__ == "__main__":
         files = os.listdir(PATH + folder)
         files[:] = [x for x in files if ".DS_Store" not in x]
         if (len(files) != 1 and len(files) != 0):
-            print('crop: ' + folder, i, "/", len(folders))
-            iterate_patches(files, folder, args, height, width)
+            content = iterate_patches(files, folder, args, height, width)
+            output_file.write(content + "\n")
         #break
+        if i == 40:
+            output_file.close()
+            break
+
+    output_file.close()
         # crop_v2(files,folder)
+    # with open('output.txt', 'w') as file:
+    #     file.write(json.dumps(output_dict)) # use `json.loads` to do the reverse
+
 
 # txt = input("Type something to test this out: ")
