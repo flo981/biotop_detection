@@ -22,13 +22,14 @@ import numpy as np
 from PIL import Image, ImageFilter
 import cv2
 ```
-- Driver chrome (firefox also possible):
+- Driver chrome (firefox/safari also possible):
 
 https://chromedriver.chromium.org/downloads
 ```
 copy to usr/local/bin/
 ```
 
+### Jupyter Notebook Example in ```src/bio_generator```
 
 ## net train
 - Run training xxxnet
