@@ -38,9 +38,10 @@ from folium.folium import Map
 from folium.features import DivIcon
 from pyproj import Transformer
 ```
-- Driver chrome (firefox/safari also possible):
-
+- chrome driver (safari also possible):
 https://chromedriver.chromium.org/downloads
+- firefox driver:
+https://github.com/mozilla/geckodriver/releases
 ```
 copy to usr/local/bin/
 ```
