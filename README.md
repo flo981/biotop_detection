@@ -14,8 +14,9 @@ training
  
 net
 - sliding window to squre meter calcuation
-- better outfile (excel)?
+- better outfile (excel after list is filled)
 - total % 
+
   
 _____________________________________________________________________________
 
