@@ -1,20 +1,20 @@
-Todos:
+_____________________________________________________________________________
+### Todos:
 - folium2png
-  - text file generation
-  - folium2png -> input which png files to generate
+- text file generation
+- folium2png -> input which png files to generate
 
--training
-  - new training dataset
-  - patch size training <> patch size training data ?! 
-  - more classes?!
+training
+- new training dataset
+- patch size training <> patch size training data ?! 
+- more classes?!
  
- -net
-  - sliding window to squre meter calcuation
-  - better outfile (excel)?
-  - total % 
+-net
+- sliding window to squre meter calcuation
+- better outfile (excel)?
+- total % 
   
-  
- 
+_____________________________________________________________________________
 
 # Biotop_detection
 
@@ -29,16 +29,14 @@ Automated Biotop processing using public availiable aerial image data (orthophot
 
 - Dependencies:
 ```
+import os
+import io
+from PIL import Image
 import geopandas as gpd
 import folium
 from folium.folium import Map
+from folium.features import DivIcon
 from pyproj import Transformer
-from selenium import webdriver
-import os
-import io
-import numpy as np
-from PIL import Image, ImageFilter
-import cv2
 ```
 - Driver chrome (firefox/safari also possible):
 
@@ -47,10 +45,24 @@ https://chromedriver.chromium.org/downloads
 copy to usr/local/bin/
 ```
 
-### Jupyter Notebook Example in ```src/bio_generator```
+Jupyter Notebook Example in ```src/bio_generator```
 
 ## net train
-- Run training xxxnet
+
+- Dependencies:
+```
+import cv2
+import os
+from shutil import copyfile
+import numpy as np
+import imutils
+import argparse
+import numpy as np
+from PIL import Image
+import tensorflow as tf  # TF2
+```
+
+- Run training mobilenet_v2
 ```
 make_image_classifier   --image_dir /Users/flo/Desktop/backup_output_biotop/training_patches/   --tfhub_module https://tfhub.dev/google/tf2-preview/mobilenet_v2/feature_vector/4   --image_size 224   --saved_model_dir my_dir/new_model   --labels_output_file class_labels.txt   --tflite_output_file new_mobile_model.tflite --train_epochs 20
 ```
