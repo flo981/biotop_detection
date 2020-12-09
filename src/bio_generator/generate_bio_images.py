@@ -1,12 +1,16 @@
-import geopandas as gpd
-import folium
-from folium.folium import Map
-from pyproj import Transformer
-from selenium import webdriver
+import argparse
 import os
 import io
 from PIL import Image
+
+import geopandas as gpd
+
+import folium
+from folium.folium import Map
 from folium.features import DivIcon
+
+from pyproj import Transformer
+from selenium import webdriver
 
 
 def getText(temp_biotop):
@@ -103,23 +107,80 @@ def create_bio_path(bio_i):
 def save_current_biotop2(m_temp, bio_number,case):
     img_data = m_temp._to_png()
     img = Image.open(io.BytesIO(img_data))
-    temp_path = '../../data/output_biotop_dir/' + 'bio_' + bio_number + '/'
+    temp_path = arg.output_dir + 'bio_' + bio_number + '/'
     img.save(os.path.join(script_dir, temp_path + case + '_' + bio_number + '.png'))
 
 if __name__ == "__main__":
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        '-s',
+        '--shapefile',
+        default='../../data/Biotopkartierung/Biotopkartierung.shp',
+        help='Path to shapefile')
+    parser.add_argument(
+        '-b',
+        '--biotypes',
+        default=['8.1.1.1', '8.1.1.2'],
+        help='biotypes (list)')
+    parser.add_argument(
+        '-w',
+        '--wmts',
+        default='http://maps.wien.gv.at/basemap/bmaporthofoto30cm/normal/google3857/{z}/{y}/{x}.jpeg',
+        help='wmts layer')
+    parser.add_argument(
+        '-d',
+        '--driver',
+        default='chrome',
+        help='webdriver (chrome,firefix,safarie)')
+    parser.add_argument(
+        '-dp',
+        '--driver_path',
+        default='/usr/local/bin/chromedriver',
+        help='path to webdriver')
+    parser.add_argument(
+        '-o',
+        '--output_dir',
+        default='../../data/output_biotop_dir/',
+        help='out to safe biotop images to')
+
+    parser.add_argument(
+        '-m',
+        '--mask',
+        default=True,
+        help='draw mask around biotop')
+    parser.add_argument(
+        '-t',
+        '--text',
+        default=True,
+        help='draw description into biotop')
+    parser.add_argument(
+        '-sum',
+        '--summary',
+        default=True,
+        help='make summary')
+    args = parser.parse_args()
+
+
     script_dir = os.path.dirname(__file__)
     print('Load: Biotopkartierung')
-    nReserve = gpd.read_file(os.path.join(script_dir, '../../data/Biotopkartierung/Biotopkartierung.shp'))
+    nReserve = gpd.read_file(os.path.join(script_dir, args.shapefile))
 
-    biotop_1 = nReserve.query("biotoptyp=='8.1.1.1'")
-    biotop_2 = nReserve.query("biotoptyp=='8.1.1.2'")
+
+    biotop_1 = nReserve.query("biotoptyp=="+"\'"+args.biotypes[0]+"\'")
+    biotop_2 = nReserve.query("biotoptyp=="+"\'"+args.biotypes[1]+"\'")
 
     print('Load: bmaporthofoto30cm')
-    wmts = "http://maps.wien.gv.at/basemap/bmaporthofoto30cm/normal/google3857/{z}/{y}/{x}.jpeg"
+    wmts = args.wmts
     #driver = webdriver.Firefox(executable_path='/usr/local/bin/geckodriver')
 
-    print('Start: webdriver (Chrome)')
-    driver = webdriver.Chrome(executable_path='/usr/local/bin/chromedriver')
+    if args.driver == 'chrome':
+        print('Start: webdriver ', args.driver)
+        driver = webdriver.Chrome(executable_path=args.driver_path)
+    else:
+        print('Different webdriver... break')
+
+
 
     transformer = Transformer.from_crs(31258, 4326, always_xy=True)  # 1frpm 2to
 
