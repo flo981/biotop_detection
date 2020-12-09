@@ -122,7 +122,8 @@ if __name__ == "__main__":
         '-b',
         '--biotypes',
         default=['8.1.1.1', '8.1.1.2'],
-        help='biotypes (list)')
+        nargs="+",
+        help='biotypes (list) input must look like : '+str('8.1.1.1' '8.1.1.2' '8.1.2.1'))
     parser.add_argument(
         '-w',
         '--wmts',
@@ -172,7 +173,7 @@ if __name__ == "__main__":
         query_str = "biotoptyp==" + str(str_nummer)
         biotop_dict[i] = nReserve.query(query_str)
 
-
+    print(biotop_dict)
 
     print('Load: bmaporthofoto30cm')
     wmts = args.wmts
