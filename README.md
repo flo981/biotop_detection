@@ -9,7 +9,7 @@ training
 - patch size training <> patch size training data ?! 
 - more classes?!
  
--net
+net
 - sliding window to squre meter calcuation
 - better outfile (excel)?
 - total % 
