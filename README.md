@@ -1,3 +1,21 @@
+Todos:
+- folium2png
+  - text file generation
+  - folium2png -> input which png files to generate
+
+-training
+  - new training dataset
+  - patch size training <> patch size training data ?! 
+  - more classes?!
+ 
+ -net
+  - sliding window to squre meter calcuation
+  - better outfile (excel)?
+  - total % 
+  
+  
+ 
+
 # Biotop_detection
 
 Automated Biotop processing using public availiable aerial image data (orthophotos via wmts layers) and geospatial vector data (shape-file) for image generation/download and processing/classificatin via Tensforlow Inception net
