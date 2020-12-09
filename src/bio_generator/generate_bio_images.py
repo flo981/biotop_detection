@@ -107,7 +107,7 @@ def create_bio_path(bio_i):
 def save_current_biotop2(m_temp, bio_number,case):
     img_data = m_temp._to_png()
     img = Image.open(io.BytesIO(img_data))
-    temp_path = arg.output_dir + 'bio_' + bio_number + '/'
+    temp_path = args.output_dir + 'bio_' + bio_number + '/'
     img.save(os.path.join(script_dir, temp_path + case + '_' + bio_number + '.png'))
 
 if __name__ == "__main__":
@@ -166,9 +166,13 @@ if __name__ == "__main__":
     print('Load: Biotopkartierung')
     nReserve = gpd.read_file(os.path.join(script_dir, args.shapefile))
 
+    biotop_dict = {}
+    for i in range(0,len(args.biotypes)):
+        str_nummer = "\'" + args.biotypes[i] + "\'"
+        query_str = "biotoptyp==" + str(str_nummer)
+        biotop_dict[i] = nReserve.query(query_str)
 
-    biotop_1 = nReserve.query("biotoptyp=="+"\'"+args.biotypes[0]+"\'")
-    biotop_2 = nReserve.query("biotoptyp=="+"\'"+args.biotypes[1]+"\'")
+
 
     print('Load: bmaporthofoto30cm')
     wmts = args.wmts
@@ -181,62 +185,41 @@ if __name__ == "__main__":
         print('Different webdriver... break')
 
 
-
     transformer = Transformer.from_crs(31258, 4326, always_xy=True)  # 1frpm 2to
 
-    len_bio_1 = biotop_1.shape[0]
-    len_bio_2 = biotop_2.shape[0]
-    len_totoal =  len_bio_1 + len_bio_2
 
-    biotop_key_nummer = biotop_1['Nummer']
-    biotop_keys = biotop_key_nummer.keys()
-    for i in range(0, len_bio_1-1):
-        key_i = biotop_keys[i]
-        bio_i = biotop_1['Nummer'][key_i]
-        str_nummer = "\'" + bio_i + "\'"
-        query_str = "Nummer==" + str(str_nummer)
-        temp_biotop = biotop_1.query(query_str)
-        temp_location = biotop_center(temp_biotop)
+    len_totoal = old_i =  0
+    for iter_bio in range(0,len(args.biotypes)):
+        len_totoal = len_totoal + biotop_dict[iter_bio].shape[0]
 
-        PATH_NEW = create_bio_path(bio_i)
-        if PATH_NEW:
-            print("Process Biotop (1): ", i, "/", len_totoal, " ", bio_i)
-            #m_temp = biotop_current_map(temp_location,text=getText(temp_biotop),BIOTOP_BORDER=False, BIOTOP_DESCRIPTION=False, case=1)
-            biotop_current_map(temp_location, text=getText(temp_biotop), BIOTOP_BORDER=False, BIOTOP_MASK = False, BIOTOP_DESCRIPTION=True,
-                           case='1')
-            biotop_current_map(temp_location, text=getText(temp_biotop), BIOTOP_BORDER=True, BIOTOP_MASK = False, BIOTOP_DESCRIPTION=False,
-                           case=1)
-            biotop_current_map(temp_location, text=getText(temp_biotop), BIOTOP_BORDER=False, BIOTOP_MASK = True, BIOTOP_DESCRIPTION=False,
-                           case=1)
-        #save_current_biotop2(m_temp, bio_i, 1)
-        else:
-            print("Already Existing Biotop (1): ", i, "/", len_totoal, " ", bio_i)
+    #for biotop_dict[iter_bio] in biotop_dict:
+    for iter_bio in range(0,len(args.biotypes)):
+        biotop_key_nummer = biotop_dict[iter_bio]['Nummer']
+        biotop_keys = biotop_key_nummer.keys()
+        for i in range(0, biotop_dict[iter_bio].shape[0]-1):
+            key_i = biotop_keys[i]
+            bio_i = biotop_dict[iter_bio]['Nummer'][key_i]
+            str_nummer = "\'" + bio_i + "\'"
+            query_str = "Nummer==" + str(str_nummer)
+            temp_biotop = biotop_dict[iter_bio].query(query_str)
+            temp_location = biotop_center(temp_biotop)
+
+            PATH_NEW = create_bio_path(bio_i)
+            if PATH_NEW:
+                print("Process Biotop: ", i+old_i, "/", len_totoal, " ", bio_i, " type: ", args.biotypes[iter_bio])
+                #m_temp = biotop_current_map(temp_location,text=getText(temp_biotop),BIOTOP_BORDER=False, BIOTOP_DESCRIPTION=False, case=1)
+                biotop_current_map(temp_location, text=getText(temp_biotop), BIOTOP_BORDER=False, BIOTOP_MASK = False, BIOTOP_DESCRIPTION=True,
+                               case=args.biotypes[iter_bio][-1])
+                biotop_current_map(temp_location, text=getText(temp_biotop), BIOTOP_BORDER=True, BIOTOP_MASK = False, BIOTOP_DESCRIPTION=False,
+                               case=args.biotypes[iter_bio][-1])
+                biotop_current_map(temp_location, text=getText(temp_biotop), BIOTOP_BORDER=False, BIOTOP_MASK = True, BIOTOP_DESCRIPTION=False,
+                               case=args.biotypes[iter_bio][-1])
+            #save_current_biotop2(m_temp, bio_i, 1)
+            #case=biotop_key_nummer[-1] error key!
+            else:
+                print("Already Existing Biotop: ", i+old_i, "/", len_totoal, " ", bio_i)
+        old_i = old_i + i
 
 
-    biotop_key_nummer = biotop_2['Nummer']
-    biotop_keys = biotop_key_nummer.keys()
-    for j in range(0, len_bio_2-1):
-        key_i = biotop_keys[j]
-        bio_i = biotop_2['Nummer'][key_i]
-        str_nummer = "\'" + bio_i + "\'"
-        query_str = "Nummer==" + str(str_nummer)
-        temp_biotop = biotop_2.query(query_str)
-
-        temp_location = biotop_center(temp_biotop)
-
-        PATH_NEW = create_bio_path(bio_i)
-        if PATH_NEW:
-            print("Process Biotop (2): ", j + i, "/", len_totoal, " ", bio_i)
-            biotop_current_map(temp_location, text=getText(temp_biotop), BIOTOP_BORDER=False, BIOTOP_MASK = False, BIOTOP_DESCRIPTION=True,
-                           case='2')
-            biotop_current_map(temp_location, text=getText(temp_biotop), BIOTOP_BORDER=True, BIOTOP_MASK = False, BIOTOP_DESCRIPTION=False,
-                           case=2)
-            biotop_current_map(temp_location, text=getText(temp_biotop), BIOTOP_BORDER=False, BIOTOP_MASK = True, BIOTOP_DESCRIPTION=False,
-                               case=2)
-
-        #m_temp = biotop_current_map(temp_location,text=getText(temp_biotop),BIOTOP_BORDER=False, BIOTOP_DESCRIPTION=False)
-        #save_current_biotop2(m_temp, bio_i, 2)
-        else:
-            print("Already Existing Biotop (2): ", i, "/", len_totoal, " ", bio_i)
 
 #TODO: down-size images
