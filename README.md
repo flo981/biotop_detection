@@ -2,7 +2,7 @@ _____________________________________________________________________________
 ### Todos:
 folium2png
 
-- ~~ biotop-type selection (current only 8.1.1.1+8.1.1.2)~~
+- ~~biotop-type selection (current only 8.1.1.1+8.1.1.2)~~
 - text file generation
 - folium2png -> input which png files to generate
 - resize output
