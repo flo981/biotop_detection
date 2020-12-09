@@ -1,6 +1,6 @@
 _____________________________________________________________________________
 ### Todos:
-- folium2png
+folium2png
 - text file generation
 - folium2png -> input which png files to generate
 
@@ -45,7 +45,7 @@ https://chromedriver.chromium.org/downloads
 copy to usr/local/bin/
 ```
 
-Jupyter Notebook Example in ```src/bio_generator```
+Jupyter Notebook Example in ```src/bio_generator/```
 
 ## net train
 
