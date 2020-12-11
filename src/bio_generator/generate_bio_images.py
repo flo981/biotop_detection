@@ -11,6 +11,7 @@ from folium.features import DivIcon
 
 from pyproj import Transformer
 from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 
 
 def getText(temp_biotop):
@@ -35,6 +36,47 @@ def style_fcn_hull(x):
 def style_fcn_env(x):
     return {'stroke':True,'color': '#F700FF', 'fillColor': '#AARRGGBB','opacity':1, 'weight':2, 'line_cap':'round', 'fill':False}
 
+def create_info_textfile(biotop):
+
+    temp_nummer = temp_biotop['Nummer'][temp_biotop['Nummer'].keys()[0]]
+    temp_gemnr = temp_biotop['gemnr'][temp_biotop['gemnr'].keys()[0]]
+    temp_biotoptyp = temp_biotop['biotoptyp'][temp_biotop['biotoptyp'].keys()[0]]
+    temp_bezeich = temp_biotop['bezeich'][temp_biotop['bezeich'].keys()[0]]
+    temp_bio_katgem = temp_biotop['bio_katgem'][temp_biotop['bio_katgem'].keys()[0]]
+    temp_bio_subnr = temp_biotop['bio_subnr'][temp_biotop['bio_subnr'].keys()[0]]
+    temp_bezeichnun = temp_biotop['bezeichnun'][temp_biotop['bezeichnun'].keys()[0]]
+    temp_rechtl_Sch = temp_biotop['rechtl_Sch'][temp_biotop['rechtl_Sch'].keys()[0]]
+    link1 = temp_biotop['Link'][temp_biotop['Link'].keys()[0]]
+    link2 = temp_biotop['Link_ext'][temp_biotop['Link_ext'].keys()[0]]
+    #link1: http://anwendung/ins/biotop/display.do?id=1175590
+    #link2: https://service.salzburg.gv.at/ins/biotop/disp...
+    # =>    https://service.salzburg.gv.at/ins/biotop/ + display.do?id=1175590
+    # link immer 7-Stellig? Sonst nach = suchen
+    ID = link1[-7:]
+    link_public = "https://service.salzburg.gv.at/ins/biotop/display.do?id="+str(ID)
+    link_intern = "https://portal.salzburg.gv.at/ins/biotop/display.do?id="+str(ID)
+
+    temp_path = args.output_dir + 'bio_' + temp_nummer + '/' + temp_nummer + "_info.txt"
+
+    output_file = open(temp_path, 'w')
+    output_file.write("Biotop Nummer: "+ str(temp_nummer) + "\n")
+    output_file.write("Biotop Kat Gem: "+ str(temp_bio_katgem) + "\n")
+    output_file.write("Biotop Sub Nr: "+ str(temp_bio_subnr) + "\n")
+    output_file.write("Gemeinde Nummer: "+ str(temp_gemnr)+ "\n")
+    output_file.write("Biotop Typ: "+ str(temp_biotoptyp) + "\n")
+    output_file.write("Biotop Bezeichnung: "+ str(temp_bezeich) + "\n")
+    output_file.write("Biotop Bezeichnung(2): "+ str(temp_bezeichnun) + "\n")
+    output_file.write("Biotop §: "+ str(temp_rechtl_Sch) + "\n")
+    output_file.write("Biotop Link-Public: "+ link_public + "\n")
+    output_file.write("Biotop Link-Public: "+ link_intern + "\n")
+    output_file.write("Biotop Location: "+ str(biotop_center(biotop)) + "\n")
+    output_file.write("Biotop Surface (approx): '{:f}'\n".format(biotop_surface(biotop)))
+    output_file.close()
+def biotop_surface(biotop):
+    #check?
+    temp = temp_biotop['geometry'].to_crs({'init': 'epsg:3395'})\
+               .map(lambda p: p.area / 10**6)
+    return temp[temp.keys()[0]]
 
 
 def biotop_center(temp_biotop):
@@ -110,6 +152,8 @@ def save_current_biotop2(m_temp, bio_number,case):
     temp_path = args.output_dir + 'bio_' + bio_number + '/'
     img.save(os.path.join(script_dir, temp_path + case + '_' + bio_number + '.png'))
 
+
+
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
@@ -173,15 +217,16 @@ if __name__ == "__main__":
         query_str = "biotoptyp==" + str(str_nummer)
         biotop_dict[i] = nReserve.query(query_str)
 
-    print(biotop_dict)
-
     print('Load: bmaporthofoto30cm')
     wmts = args.wmts
     #driver = webdriver.Firefox(executable_path='/usr/local/bin/geckodriver')
 
     if args.driver == 'chrome':
         print('Start: webdriver ', args.driver)
-        driver = webdriver.Chrome(executable_path=args.driver_path)
+        #driver = webdriver.Chrome(executable_path=args.driver_path)
+        options = Options()
+        options.headless = True
+        driver = webdriver.Chrome(args.driver_path, chrome_options=options)
     else:
         print('Different webdriver... break')
 
@@ -211,15 +256,20 @@ if __name__ == "__main__":
                 #m_temp = biotop_current_map(temp_location,text=getText(temp_biotop),BIOTOP_BORDER=False, BIOTOP_DESCRIPTION=False, case=1)
                 biotop_current_map(temp_location, text=getText(temp_biotop), BIOTOP_BORDER=False, BIOTOP_MASK = False, BIOTOP_DESCRIPTION=True,
                                case=args.biotypes[iter_bio][-1])
-                biotop_current_map(temp_location, text=getText(temp_biotop), BIOTOP_BORDER=True, BIOTOP_MASK = False, BIOTOP_DESCRIPTION=False,
-                               case=args.biotypes[iter_bio][-1])
-                biotop_current_map(temp_location, text=getText(temp_biotop), BIOTOP_BORDER=False, BIOTOP_MASK = True, BIOTOP_DESCRIPTION=False,
-                               case=args.biotypes[iter_bio][-1])
+                # biotop_current_map(temp_location, text=getText(temp_biotop), BIOTOP_BORDER=True, BIOTOP_MASK = False, BIOTOP_DESCRIPTION=False,
+                #                case=args.biotypes[iter_bio][-1])
+                # biotop_current_map(temp_location, text=getText(temp_biotop), BIOTOP_BORDER=False, BIOTOP_MASK = True, BIOTOP_DESCRIPTION=False,
+                #                case=args.biotypes[iter_bio][-1])
+
             #save_current_biotop2(m_temp, bio_i, 1)
             #case=biotop_key_nummer[-1] error key!
+                if args.text: create_info_textfile(temp_biotop)
+
             else:
                 print("Already Existing Biotop: ", i+old_i, "/", len_totoal, " ", bio_i)
         old_i = old_i + i
+    print("Done.")
+    driver.quit()
 
 
 
