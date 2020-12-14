@@ -1,3 +1,0 @@
-create:
-data/output_biotop_dir/
-files will be generated here

@@ -13,6 +13,8 @@ from pyproj import Transformer
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 
+import time
+
 
 def getText(temp_biotop):
     temp_nummer = temp_biotop['Nummer'][temp_biotop['Nummer'].keys()[0]]
@@ -70,13 +72,14 @@ def create_info_textfile(biotop):
     output_file.write("Biotop Link-Public: "+ link_public + "\n")
     output_file.write("Biotop Link-Public: "+ link_intern + "\n")
     output_file.write("Biotop Location: "+ str(biotop_center(biotop)) + "\n")
-    output_file.write("Biotop Surface (approx): '{:f}'\n".format(biotop_surface(biotop)))
+    output_file.write("Biotop Surface (approx): {:f} m*m\n".format(biotop_surface(biotop)))
     output_file.close()
+
 def biotop_surface(biotop):
     #check?
-    temp = temp_biotop['geometry'].to_crs({'init': 'epsg:3395'})\
+    temp = temp_biotop['geometry'].to_crs("EPSG:3395")\
                .map(lambda p: p.area / 10**6)
-    return temp[temp.keys()[0]]
+    return temp[temp.keys()[0]]*450000
 
 
 def biotop_center(temp_biotop):
@@ -129,6 +132,7 @@ def biotop_current_map(temp_location, text, BIOTOP_BORDER, BIOTOP_MASK ,BIOTOP_D
         temp_biotop_convex_hull = temp_biotop.convex_hull
     if BIOTOP_ENV:
         temp_biotop_envelope = temp_biotop.envelope
+
 
     save_current_biotop2(m_temp, bio_i, case)
     #return m_temp
@@ -243,6 +247,7 @@ if __name__ == "__main__":
         biotop_key_nummer = biotop_dict[iter_bio]['Nummer']
         biotop_keys = biotop_key_nummer.keys()
         for i in range(0, biotop_dict[iter_bio].shape[0]-1):
+            start = time.time()
             key_i = biotop_keys[i]
             bio_i = biotop_dict[iter_bio]['Nummer'][key_i]
             str_nummer = "\'" + bio_i + "\'"
@@ -254,12 +259,12 @@ if __name__ == "__main__":
             if PATH_NEW:
                 print("Process Biotop: ", i+old_i, "/", len_totoal, " ", bio_i, " type: ", args.biotypes[iter_bio])
                 #m_temp = biotop_current_map(temp_location,text=getText(temp_biotop),BIOTOP_BORDER=False, BIOTOP_DESCRIPTION=False, case=1)
-                biotop_current_map(temp_location, text=getText(temp_biotop), BIOTOP_BORDER=False, BIOTOP_MASK = False, BIOTOP_DESCRIPTION=True,
+                biotop_current_map(temp_location, text=getText(temp_biotop), BIOTOP_BORDER=False, BIOTOP_MASK = False, BIOTOP_DESCRIPTION=False,
                                case=args.biotypes[iter_bio][-1])
-                # biotop_current_map(temp_location, text=getText(temp_biotop), BIOTOP_BORDER=True, BIOTOP_MASK = False, BIOTOP_DESCRIPTION=False,
-                #                case=args.biotypes[iter_bio][-1])
-                # biotop_current_map(temp_location, text=getText(temp_biotop), BIOTOP_BORDER=False, BIOTOP_MASK = True, BIOTOP_DESCRIPTION=False,
-                #                case=args.biotypes[iter_bio][-1])
+                biotop_current_map(temp_location, text=getText(temp_biotop), BIOTOP_BORDER=True, BIOTOP_MASK = False, BIOTOP_DESCRIPTION=False,
+                               case=args.biotypes[iter_bio][-1])
+                biotop_current_map(temp_location, text=getText(temp_biotop), BIOTOP_BORDER=False, BIOTOP_MASK = True, BIOTOP_DESCRIPTION=False,
+                               case=args.biotypes[iter_bio][-1])
 
             #save_current_biotop2(m_temp, bio_i, 1)
             #case=biotop_key_nummer[-1] error key!
@@ -267,7 +272,9 @@ if __name__ == "__main__":
 
             else:
                 print("Already Existing Biotop: ", i+old_i, "/", len_totoal, " ", bio_i)
+
         old_i = old_i + i
+
     print("Done.")
     driver.quit()
 
