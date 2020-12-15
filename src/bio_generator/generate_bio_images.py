@@ -72,14 +72,14 @@ def create_info_textfile(biotop):
     output_file.write("Biotop Link-Public: "+ link_public + "\n")
     output_file.write("Biotop Link-Public: "+ link_intern + "\n")
     output_file.write("Biotop Location: "+ str(biotop_center(biotop)) + "\n")
-    output_file.write("Biotop Surface (approx): {:f} m*m\n".format(biotop_surface(biotop)))
+    output_file.write("Biotop Surface (approx): {:02.2f} m*m\n".format(biotop_surface(biotop)))
     output_file.close()
 
 def biotop_surface(biotop):
     #check?
     temp = temp_biotop['geometry'].to_crs("EPSG:3395")\
-               .map(lambda p: p.area / 10**6)
-    return temp[temp.keys()[0]]*450000
+               .map(lambda p: p.area)
+    return temp[temp.keys()[0]]*0.450
 
 
 def biotop_center(temp_biotop):
