@@ -6,6 +6,11 @@ Automated Biotop processing using public availiable aerial image data (orthophot
 - Re-Training of Inception v4 Net with biotop samples (Transfer-Learing)
 - Classsification of biotops with trained net using a sliding window
 
+![alt text](https://github.com/flo981/biotop_detection/blob/net_v2/Examples/images/big.png?raw=true)
+![alt text](https://github.com/flo981/biotop_detection/blob/net_v2/Examples/images/small.png?raw=true)
+
+
+
 # Modules:
 ## Image generation:
 
