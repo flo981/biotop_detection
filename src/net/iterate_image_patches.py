@@ -22,9 +22,6 @@ import csv
 from pprint import pprint
 
 
-
-
-
 def pyramid(image, scale=1.5, minSize=(20, 20)):
     # yield the original image
     yield image
@@ -241,12 +238,3 @@ if __name__ == "__main__":
             print(i,"/",len(folders))
     #output_file.close()
     write_csv(output_dict)
-
-
-    #output_file.close()
-        # crop_v2(files,folder)
-    # with open('output.txt', 'w') as file:
-    #     file.write(json.dumps(output_dict)) # use `json.loads` to do the reverse
-
-
-# txt = input("Type something to test this out: ")
