@@ -1,6 +1,7 @@
 # go through biotop_dir, show image,ask label
 import cv2
 import os
+import os.path
 from shutil import copyfile
 import numpy as np
 import imutils
@@ -16,6 +17,9 @@ import time
 import numpy as np
 from PIL import Image
 import tensorflow as tf  # TF2
+
+import csv
+from pprint import pprint
 
 
 
@@ -53,6 +57,40 @@ def load_labels(filename):
     with open(filename, 'r') as f:
         return [line.strip() for line in f.readlines()]
 
+def write_csv(output_dict):
+
+    print("Write output .csv file...")
+    out = open('out.csv', 'w')
+    out.write("Biotop;")
+    out.write("percentage;")
+    out.write("nPatches;")
+    out.write('\n')
+    for row in output_dict:
+        out.write('%s;' % output_dict[row]['bio'])
+        out.write('%d;' % output_dict[row]['percentage'])
+        out.write('%d;' % output_dict[row]['nPatches'])
+        # for column in row:
+        #     print("column",type(column))
+        #     out.write('%d;' % column)
+        out.write('\n')
+    out.close()
+    sorted_dict = sorted(output_dict.items(), key=lambda item: int(item[1]['percentage']))
+
+    out = open('sorted_out.csv', 'w')
+    out.write("Biotop;")
+    out.write("percentage;")
+    out.write("nPatches;")
+    out.write('\n')
+    for row in sorted_dict:
+        out.write('%s;' % row[1]['bio'])
+        out.write('%d;' % row[1]['percentage'])
+        out.write('%d;' % row[1]['nPatches'])
+        # for column in row:
+        #     print("column",type(column))
+        #     out.write('%d;' % column)
+        out.write('\n')
+    out.close()
+
 
 def iterate_patches(files, bio_folder, args, height, width):
     borderfile = [x for x in files if "B" in x and "cropped" not in x][0]
@@ -69,6 +107,7 @@ def iterate_patches(files, bio_folder, args, height, width):
     (winW, winH) = (16, 16)
     labels = load_labels(args.label_file)
     # loop over the image pyramid
+
     for resized in pyramid(image_mask, scale=1000):
         # loop over the sliding window for each layer of the pyramid
         for (x, y, window) in sliding_window(resized, stepSize=winW, windowSize=(winW, winH)):
@@ -103,8 +142,7 @@ def iterate_patches(files, bio_folder, args, height, width):
                 results = np.squeeze(output_data)
 
                 top_k = results.argsort()[-5:][::-1]
-                cv2.imshow("window", mod_im)
-                key = cv2.waitKey(0)
+
 
                 if top_k[0] == 1:
                     #no bio
@@ -122,22 +160,29 @@ def iterate_patches(files, bio_folder, args, height, width):
 
         percent = (c_bio*100)/(c_bio+c_nbio)
         content  = "{} {:02.2f} {}".format(bio_folder[4:], percent, c_bio+c_nbio)
-        print(content)
+        #print(content)
 
-        #show results in patch
-        cv2.imshow("window", mod_im)
-        key = cv2.waitKey(0)
+        ## show results in patch
+        #cv2.imshow("window", mod_im)
+        #key = cv2.waitKey(0)
 
-        content  = "{} {:02.2f} {}".format(bio_folder[4:], percent, c_bio+c_nbio)
+        ## save results
+        file = '../../data/output_biotop_dir/' + bio_folder + '/' + "analyse_"+ bio_folder + ".png"
+        mod_im = cv2.cvtColor(mod_im, cv2.COLOR_RGBA2RGB)
+        cv2.imwrite(file,mod_im)
+
+        ## write results into bio_textfile
+        #info_file = '../../data/output_biotop_dir/' + bio_folder + '/' + bio_folder[4:] + '_info.txt'
+        #bio_info = open(info_file, 'w')
+        #bio_info.write("test" + "\n")
+        #bio_info.close()
+
+        content = [bio_folder, round(percent,2), c_bio+c_nbio]
+        #content  = "{} {:02.2f} {}".format(bio_folder[4:], percent, c_bio+c_nbio)
         return content
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        '-i',
-        '--image',
-        default='/tmp/grace_hopper.bmp',
-        help='image to be classified')
     parser.add_argument(
         '-m',
         '--model_file',
@@ -178,8 +223,10 @@ if __name__ == "__main__":
     i = 0
 
     #write results to file
-    output_file = open('output.txt', 'w')
-    output_file.write("BiotopNR Percentage nPatches\n")
+    #output_file = open('output.txt', 'w')
+    #output_file.write("BiotopNR Percentage nPatches\n")
+
+    output_dict = {}
 
     # Remove ".DS_Store"
     folders[:] = [x for x in folders if ".DS_Store" not in x]
@@ -189,13 +236,14 @@ if __name__ == "__main__":
         files[:] = [x for x in files if ".DS_Store" not in x and ".txt" not in x]
         if (len(files) != 1 and len(files) != 0):
             content = iterate_patches(files, folder, args, height, width)
-            output_file.write(content + "\n")
-        #break
-        if i == 1000:
-            output_file.close()
-            break
+            #output_file.write(content + "\n")
+            output_dict[i] = {'bio': content[0], 'percentage': content[1], 'nPatches': content[2]}
+            print(i,"/",len(folders))
+    #output_file.close()
+    write_csv(output_dict)
 
-    output_file.close()
+
+    #output_file.close()
         # crop_v2(files,folder)
     # with open('output.txt', 'w') as file:
     #     file.write(json.dumps(output_dict)) # use `json.loads` to do the reverse
