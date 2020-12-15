@@ -55,10 +55,9 @@ def load_labels(filename):
 
 
 def iterate_patches(files, bio_folder, args, height, width):
-
     borderfile = [x for x in files if "B" in x and "cropped" not in x][0]
     rawfile = [x for x in files if "M" not in x and "cropped" not in x if "B" not in x][0]
-    cropfile = [x for x in files if "crop" in x][0]
+    cropfile = [x for x in files if "C" in x][0]
     # Open image with red border line and make into Numpy array
     # im = Image.open('../data/output_biotop_dir/' + bio_folder + '/' + borderfile).convert('RGB')
     image = cv2.imread('../../data/output_biotop_dir/' + bio_folder + '/' + borderfile)
@@ -68,6 +67,7 @@ def iterate_patches(files, bio_folder, args, height, width):
     c_bio = c_nbio = 0
     # SLIDING WINDOW
     (winW, winH) = (16, 16)
+    labels = load_labels(args.label_file)
     # loop over the image pyramid
     for resized in pyramid(image_mask, scale=1000):
         # loop over the sliding window for each layer of the pyramid
@@ -103,16 +103,17 @@ def iterate_patches(files, bio_folder, args, height, width):
                 results = np.squeeze(output_data)
 
                 top_k = results.argsort()[-5:][::-1]
-                labels = load_labels(args.label_file)
+                cv2.imshow("window", mod_im)
+                key = cv2.waitKey(0)
 
-
-                if top_k[1] == 1:
-                    c_bio = c_bio+1
-                    mod_im = cv2.rectangle(mod_im, (x, y), (x + winW, y + winH), (0, 255, 0), 1)
-                else:
+                if top_k[0] == 1:
+                    #no bio
                     c_nbio = c_nbio+1
                     mod_im = cv2.rectangle(mod_im, (x, y), (x + winW, y + winH), (0, 0, 255), 1)
-
+                if top_k[0] == 0:
+                    #bio
+                    c_bio = c_bio+1
+                    mod_im = cv2.rectangle(mod_im, (x, y), (x + winW, y + winH), (0, 255, 0), 1)
                 # for i in top_k:
                 #     if floating_model:
                 #         print('{:08.6f}: {}'.format(float(results[i]), labels[i]))
@@ -185,12 +186,12 @@ if __name__ == "__main__":
     for folder in folders:
         i = i + 1
         files = os.listdir(PATH + folder)
-        files[:] = [x for x in files if ".DS_Store" not in x]
+        files[:] = [x for x in files if ".DS_Store" not in x and ".txt" not in x]
         if (len(files) != 1 and len(files) != 0):
             content = iterate_patches(files, folder, args, height, width)
             output_file.write(content + "\n")
         #break
-        if i == 40:
+        if i == 1000:
             output_file.close()
             break
 

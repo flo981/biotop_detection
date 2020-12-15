@@ -92,8 +92,7 @@ def cropImage(files, bio_folder):
 
 def crop_masked(files,bio_folder):
     borderfile = [x for x in files if "M" in x][0]
-    rawfile = [x for x in files if "M" not in x][0]
-
+    rawfile = [x for x in files if "M" not in x and ".txt" not in x and "C" not in x][0]
     # Open image with red border line and make into Numpy array
     image_mask = cv2.imread('../../data/output_biotop_dir/' + bio_folder + '/' + borderfile)
     image_raw = cv2.imread('../../data/output_biotop_dir/' + bio_folder + '/' + rawfile)
@@ -103,7 +102,6 @@ def crop_masked(files,bio_folder):
 
     # Make all not white pixels black
     image_mask[np.all(image_mask != (255, 255, 255), axis=-1)] = (0,0,0)
-
     #apply mask
     masked_image = cv2.bitwise_and(image_raw, image_mask)
 
@@ -125,8 +123,7 @@ def crop_masked(files,bio_folder):
     rgba = [b, g, r, alpha]
     dst = cv2.merge(rgba, 4)
 
-    filename = '../../data/output_biotop_dir/' + bio_folder + '/' + '1cropped_' + rawfile
-    print(" ==== > Crop: ", rawfile)
+    filename = '../../data/output_biotop_dir/' + bio_folder + '/' + 'C_' + rawfile
     # save the result
 
     cv2.imwrite(filename, dst)
@@ -136,7 +133,7 @@ if __name__ == "__main__":
     folders = os.listdir(PATH)
     i=0
     #Remove ".DS_Store"
-    folders[:] = [x for x in folders if ".DS_Store" not in x]
+    folders[:] = [x for x in folders if ".DS_Store" not in x and ".txt" not in x]
     for folder in folders:
         i=i+1
         files = os.listdir(PATH + folder)
