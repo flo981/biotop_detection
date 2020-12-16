@@ -3,19 +3,19 @@ _____________________________________________________________________________
 folium2png
 
 - ~~biotop-type selection (current only 8.1.1.1+8.1.1.2)~~
-- text file generation
+- ~~text file generation~~
 - folium2png -> input which png files to generate
 - resize output
 
 training
-- new training dataset
+- ~~new training dataset~~
 - patch size training <> patch size training data ?! 
-- more classes?!
+- ~~more classes?!~~
  
 net
-- sliding window to squre meter calcuation
-- better outfile (excel after list is filled)
-- total % 
+- ~~sliding window to squre meter calcuation~~
+- ~~better outfile (excel after list is filled)~~
+- ~~total percent~~
 
   
 _____________________________________________________________________________
