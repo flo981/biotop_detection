@@ -20,6 +20,7 @@ import tensorflow as tf  # TF2
 
 import csv
 from pprint import pprint
+import pickle
 
 
 def pyramid(image, scale=1.5, minSize=(20, 20)):
@@ -63,7 +64,7 @@ def write_csv(output_dict):
     out.write("nPatches;")
     out.write('\n')
     for row in output_dict:
-        out.write('%s;' % output_dict[row]['bio'])
+        #out.write('%s;' % output_dict[row]['bio'])
         out.write('%d;' % output_dict[row]['percentage'])
         out.write('%d;' % output_dict[row]['nPatches'])
         # for column in row:
@@ -71,22 +72,22 @@ def write_csv(output_dict):
         #     out.write('%d;' % column)
         out.write('\n')
     out.close()
-    sorted_dict = sorted(output_dict.items(), key=lambda item: int(item[1]['percentage']))
-
-    out = open('sorted_out.csv', 'w')
-    out.write("Biotop;")
-    out.write("percentage;")
-    out.write("nPatches;")
-    out.write('\n')
-    for row in sorted_dict:
-        out.write('%s;' % row[1]['bio'])
-        out.write('%d;' % row[1]['percentage'])
-        out.write('%d;' % row[1]['nPatches'])
-        # for column in row:
-        #     print("column",type(column))
-        #     out.write('%d;' % column)
-        out.write('\n')
-    out.close()
+    # sorted_dict = sorted(output_dict.items(), key=lambda item: int(item[1]['percentage']))
+    #
+    # out = open('sorted_out.csv', 'w')
+    # out.write("Biotop;")
+    # out.write("percentage;")
+    # out.write("nPatches;")
+    # out.write('\n')
+    # for row in sorted_dict:
+    #     out.write('%s;' % row[1]['bio'])
+    #     out.write('%d;' % row[1]['percentage'])
+    #     out.write('%d;' % row[1]['nPatches'])
+    #     # for column in row:
+    #     #     print("column",type(column))
+    #     #     out.write('%d;' % column)
+    #     out.write('\n')
+    # out.close()
 
 
 def iterate_patches(files, bio_folder, args, height, width):
@@ -183,12 +184,12 @@ if __name__ == "__main__":
     parser.add_argument(
         '-m',
         '--model_file',
-        default='/tmp/mobilenet_v1_1.0_224_quant.tflite',
+        default='/Users/flo/Proj/sat_hedge_detection/src/net/models/inception_v3_new_dataset_tuning.tflite',
         help='.tflite model to be executed')
     parser.add_argument(
         '-l',
         '--label_file',
-        default='/tmp/labels.txt',
+        default='/Users/flo/Proj/sat_hedge_detection/src/net/models/labels.txt',
         help='name of file containing labels')
     parser.add_argument(
         '--input_mean',
@@ -234,7 +235,12 @@ if __name__ == "__main__":
         if (len(files) != 1 and len(files) != 0):
             content = iterate_patches(files, folder, args, height, width)
             #output_file.write(content + "\n")
-            output_dict[i] = {'bio': content[0], 'percentage': content[1], 'nPatches': content[2]}
+            #output_dict[i] = {'bio': content[0], 'percentage': content[1], 'nPatches': content[2]}
+            output_dict[content[0]] = {'percentage': content[1], 'nPatches': content[2]}
             print(i,"/",len(folders))
     #output_file.close()
-    write_csv(output_dict)
+        if i == 2:
+            #with open('pickle_test' + '.pkl', 'wb') as f:
+            #     pickle.dump(output_dict, f, pickle.HIGHEST_PROTOCOL)
+            write_csv(output_dict)
+            break
