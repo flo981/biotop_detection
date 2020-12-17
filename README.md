@@ -82,5 +82,5 @@ make_image_classifier   --image_dir /Users/flo/Desktop/backup_output_biotop/trai
 ```
 - Run classifiction and sliding window
 ```
-python iterate_image_patches.py   --input_mean 0 --input_std 255   --model_file new_mobile_model.tflite --label_file class_labels.txt --image /Users/flo/Proj/sat_hedge_detection/data/_temp_sliding_window/im/32.png
+python3 iterate_image_patches.py   --input_mean 0 --input_std 255   --model_file models/inception_v3_new_dataset_tuning.tflite  --label_file models/class_labels.txt
 ```
