@@ -147,7 +147,7 @@ def iterate_patches(files, bio_folder, args, height, width):
         #key = cv2.waitKey(0)
 
         ## save results
-        file = '../../data/output_biotop_dir/' + bio_folder + '/' + "analyse_"+ bio_folder + ".png"
+        file = '../../data/output_biotop_dir/' + bio_folder + '/' + "A_"+ bio_folder + ".png"
         mod_im = cv2.cvtColor(mod_im, cv2.COLOR_RGBA2RGB)
         cv2.imwrite(file,mod_im)
 
