@@ -11,6 +11,7 @@ training
 - ~~new training dataset~~
 - patch size training <> patch size training data ?! 
 - ~~more classes?!~~
+- re-label/re-train net!
  
 net
 - ~~sliding window to squre meter calcuation~~
