@@ -230,7 +230,7 @@ if __name__ == "__main__":
         #driver = webdriver.Chrome(executable_path=args.driver_path)
         options = Options()
         options.headless = True
-        driver = webdriver.Chrome(args.driver_path, chrome_options=options)
+        driver = webdriver.Chrome(args.driver_path, options=options)
     else:
         print('Different webdriver... break')
 
