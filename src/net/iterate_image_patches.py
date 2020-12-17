@@ -64,30 +64,12 @@ def write_csv(output_dict):
     out.write("nPatches;")
     out.write('\n')
     for row in output_dict:
-        #out.write('%s;' % output_dict[row]['bio'])
+        out.write('%s;' % row)
         out.write('%d;' % output_dict[row]['percentage'])
         out.write('%d;' % output_dict[row]['nPatches'])
-        # for column in row:
-        #     print("column",type(column))
-        #     out.write('%d;' % column)
         out.write('\n')
     out.close()
-    # sorted_dict = sorted(output_dict.items(), key=lambda item: int(item[1]['percentage']))
-    #
-    # out = open('sorted_out.csv', 'w')
-    # out.write("Biotop;")
-    # out.write("percentage;")
-    # out.write("nPatches;")
-    # out.write('\n')
-    # for row in sorted_dict:
-    #     out.write('%s;' % row[1]['bio'])
-    #     out.write('%d;' % row[1]['percentage'])
-    #     out.write('%d;' % row[1]['nPatches'])
-    #     # for column in row:
-    #     #     print("column",type(column))
-    #     #     out.write('%d;' % column)
-    #     out.write('\n')
-    # out.close()
+
 
 
 def iterate_patches(files, bio_folder, args, height, width):
@@ -237,10 +219,7 @@ if __name__ == "__main__":
             #output_file.write(content + "\n")
             #output_dict[i] = {'bio': content[0], 'percentage': content[1], 'nPatches': content[2]}
             output_dict[content[0]] = {'percentage': content[1], 'nPatches': content[2]}
-            print(i,"/",len(folders))
-    #output_file.close()
-        if i == 2:
-            #with open('pickle_test' + '.pkl', 'wb') as f:
-            #     pickle.dump(output_dict, f, pickle.HIGHEST_PROTOCOL)
-            write_csv(output_dict)
-            break
+            print(i,"/",len(folders), content)
+
+    write_csv(output_dict)
+    print("Done")
