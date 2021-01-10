@@ -18,7 +18,7 @@ def classify_patch(image):
 ##        -nWindows (Numburs of patches/sliding windows)
 ##################################################################
 
-    (winW, winH) = (16, 16)
+    (winW, winH) = (12, 12)
     c_bio = c_nbio = 0
     for resized in pyramid(image, scale=1000):
         # loop over the sliding window for each layer of the pyramid
@@ -139,7 +139,7 @@ if __name__ == "__main__":
             cv2.waitKey(0)
 
         ## save results
-        target_path = args.input_folder + current_biotop + "/" + "A_"+ current_biotop[4:] + ".png"
+        target_path = args.input_folder + current_biotop + "/" + "A_12_"+ current_biotop[4:] + ".png"
         image_classified = cv2.cvtColor(image_classified, cv2.COLOR_RGBA2RGB)
         cv2.imwrite(target_path,image_classified)
 
