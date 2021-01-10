@@ -146,6 +146,5 @@ if __name__ == "__main__":
         output_dict[current_biotop] = {'percentage': percent, 'nPatches': nWindows}
         biotop_counter = biotop_counter + 1
 
-        if biotop_counter == 3:
-            write_csv(output_dict)
-            print("Done")
+    write_csv(output_dict)
+    print("Done")

@@ -59,6 +59,8 @@ def create_info_textfile(biotop):
     link_intern = "https://portal.salzburg.gv.at/ins/biotop/display.do?id="+str(ID)
 
     temp_path = args.output_dir + 'bio_' + temp_nummer + '/' + temp_nummer + "_info.txt"
+    convert_center = biotop_center(biotop)
+
 
     output_file = open(temp_path, 'w')
     output_file.write("Biotop Nummer: "+ str(temp_nummer) + "\n")
@@ -71,7 +73,7 @@ def create_info_textfile(biotop):
     output_file.write("Biotop §: "+ str(temp_rechtl_Sch) + "\n")
     output_file.write("Biotop Link-Public: "+ link_public + "\n")
     output_file.write("Biotop Link-Public: "+ link_intern + "\n")
-    output_file.write("Biotop Location: "+ str(biotop_center(biotop)) + "\n")
+    output_file.write("Biotop Location: "+ str(convert_center[1])+","+str(convert_center[0]) + "\n")
     output_file.write("Biotop Surface (approx): {:02.2f} m*m\n".format(biotop_surface(biotop)))
     output_file.close()
 
