@@ -23,10 +23,10 @@ _____________________________________________________________________________
 
 # Biotope detection
 
-Automated biotope processing using public availiable aerial image data (orthophotos via wmts layers) and geospatial vector data (shape-file) for image generation/download and processing/classificatin via Tensforlow Inception net
+Automated biotope processing using public available aerial image data (orthophotos via wmts layers) and geospatial vector data (shape-file) for image generation/download and processing/classificatin via tensorflow inception net
 
 - Download biotopes based on wmts and biotope-shape file
-- Re-Training of Inception v4 Net with biotope samples (Transfer-Learing)
+- Re-Training of Inception v4 Net with biotope samples
 - Classsification of biotops with trained net using a sliding window
 
 ![alt text](https://github.com/flo981/biotop_detection/blob/net_v2/Examples/images/big.png?raw=true)
